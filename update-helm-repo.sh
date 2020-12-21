@@ -17,7 +17,7 @@ done
 echo "Packages are made";
 git checkout gh-pages
 m=$(git ls-files --others --exclude-standard | grep '\.tgz$')
-message="Added: "+$m
+message="Added: $m"
 git ls-files --others --exclude-standard | grep '\.tgz$' | xargs git add $1
 helm repo index --url https://observertc.github.io/helm/ .
 git commit -a -m"$message"
