@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set +x
 
 if git diff-index --quiet HEAD --; then
     echo "You have committed every changes necessary to go forward. Good! Just to be sure git push is being called"
