@@ -1,0 +1,465 @@
+# Default values for webrtc-observer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: observertc/webrtc-observer
+  pullPolicy: Always
+  tag: "0.6-alpha"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/path: '/prometheus'
+  prometheus.io/port: "7081"
+
+podSecurityContext: {}
+# fsGroup: 2000
+
+securityContext: {}
+# capabilities:
+#   drop:
+#   - ALL
+# readOnlyRootFilesystem: true
+# runAsNonRoot: true
+# runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 27080
+
+ingress:
+  enabled: false
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+# We usually recommend not to specify default resources and to leave this as a conscious
+# choice for the user. This also increases chances charts run on environments with little
+# resources, such as Minikube. If you do want to specify resources, uncomment the following
+# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 100m
+#   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+observer:
+  extraConfigMaps: []
+  # - name: name-inside-deployment
+  #   configMapName: configMapName 
+  #   mountPath: /etc/config2
+  extraSecrets: []
+  # - name: name-inside-deployment
+  #   secretName: secretName
+  #   mountPath: /etc/secrets
+  config:
+    # Micronaut configs. You can change anything you wish in micronaut using this
+    micronaut:
+      metrics:
+        enabled: True
+        export:
+          prometheus:
+            enabled: true
+            step: PT1M
+            descriptions: true
+      server:
+        port: 7080
+    endpoints:
+      all:
+        port: 7081
+      prometheus:
+        enabled: true
+        sensitive: false
+      health:
+        enabled: true
+        sensitive: false
+
+    kafka:
+      bootstrap:
+        servers: mykafka-cp-kafka-headless:9092
+    observer:
+      # static mapping for serviceUUID -> serviceName
+#      serviceMapping:
+#        serviceName: # add the name of the service as you want to see it
+#          uuid: "20e20ee1-1d4c-45d2-85d5-58b21c4953cd" # Add a valid UUID for mapping
+      evaluators:
+        activePeerConnections:
+          expirationTimeInS: 300
+          minEnforcedTimeInS: 60
+        newPeerConnections:
+          retryNumber: 3
+        expiredPeerConnections:
+          retryNumber: 3
+      kafkaTopics:
+        runAdminClient: False
+        createIfNotExists: False
+        reports:
+          topicName: reports
+          onCreatePartitionNums: 30
+          onCreateReplicateFactor: 1
+          retentionTimeInMs: 86400000
+      outboundReports:
+        reportOutboundRTPs: True
+        reportInboundRTPs: True
+        reportRemoteInboundRTPs: True
+        reportTracks: True
+        reportMediaSources: True
+        reportCandidatePairs: True
+        reportLocalCandidates: True
+        reportRemoteCandidates: True
+        reportUserMediaErrors: True
+      database:
+        username: root
+        password: password
+        minIdleInMs: 100
+        timeout: 1000
+        jdbcURL: jdbc:mysql://localhost:3306/WebRTCObserver?serverTimezone=EET&useLegacyDatetimeCode=false
+        jdbcDriver: "com.mysql.cj.jdbc.Driver"
+        maxPoolSize: 100
+        poolname: webrtc_observer
+        dialect: MySQL
+
+
+hazelcastConfig:
+  hazelcast:
+    cluster-name: dev
+    network:
+      port:
+        auto-increment: true
+        port-count: 100
+        port: 5701
+      outbound-ports:
+        # Allowed port range when connecting to other nodes.
+        # 0 or * means use system provided port.
+        - 0
+      join:
+        auto-detection:
+          enabled: false
+        multicast:
+          enabled: false
+          multicast-group: 224.2.2.3
+          multicast-port: 54327
+        tcp-ip:
+          enabled: false
+          interface: 127.0.0.1
+          member-list:
+            - 127.0.0.1
+        aws:
+          enabled: false
+        gcp:
+          enabled: false
+        azure:
+          enabled: false
+        kubernetes:
+          enabled: false
+        eureka:
+          enabled: false
+          self-registration: true
+          namespace: hazelcast
+      interfaces:
+        enabled: false
+        interfaces:
+          - 10.10.1.*
+      ssl:
+        enabled: false
+      socket-interceptor:
+        enabled: false
+      symmetric-encryption:
+        enabled: false
+        #   encryption algorithm such as
+        #   DES/ECB/PKCS5Padding,
+        #   PBEWithMD5AndDES,
+        #   AES/CBC/PKCS5Padding,
+        #   Blowfish,
+        #   DESede
+        algorithm: PBEWithMD5AndDES
+        # salt value to use when generating the secret key
+        salt: thesalt
+        # pass phrase to use when generating the secret key
+        password: thepass
+        # iteration count to use when generating the secret key
+        iteration-count: 19
+      failure-detector:
+        icmp:
+          enabled: false
+
+    partition-group:
+      enabled: false
+
+    executor-service:
+      default:
+        pool-size: 16
+        # Queue capacity. 0 means Integer.MAX_VALUE.
+        queue-capacity: 0
+        statistics-enabled: true
+
+    durable-executor-service:
+      default:
+        capacity: 100
+        durability: 1
+        pool-size: 16
+        statistics-enabled: true
+
+    scheduled-executor-service:
+      default:
+        capacity: 100
+        durability: 1
+        pool-size: 16
+        statistics-enabled: true
+
+    security:
+      client-block-unmapped-actions: true
+
+    queue:
+      default:
+        # Maximum size of the queue. When a JVM's local queue size reaches the maximum,
+        # all put/offer operations will get blocked until the queue size
+        # of the JVM goes down below the maximum.
+        # Any integer between 0 and Integer.MAX_VALUE. 0 means
+        # Integer.MAX_VALUE. Default is 0.
+        max-size: 0
+
+        # Number of backups. If 1 is set as the backup-count for example,
+        # then all entries of the map will be copied to another JVM for
+        # fail-safety. 0 means no backup.
+        backup-count: 1
+
+        # Number of async backups. 0 means no backup.
+        async-backup-count: 0
+
+        empty-queue-ttl: -1
+
+        merge-policy:
+          batch-size: 100
+          class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+    map:
+      default:
+        # Data type that will be used for storing recordMap.
+        # Possible values:
+        # BINARY (default): keys and values will be stored as binary data
+        # OBJECT : values will be stored in their object forms
+        # NATIVE : values will be stored in non-heap region of JVM
+        in-memory-format: BINARY
+
+        # Metadata creation policy for this map. Hazelcast may process
+        # objects of supported types ahead of time to create additional
+        # metadata about them. This metadata then is used to make querying
+        # and indexing faster. Metadata creation may decrease put
+        # throughput. Valid values are:
+        # CREATE_ON_UPDATE (default): Objects of supported types are
+        # pre-processed when they are created and updated.
+        # OFF: No metadata is created.
+        metadata-policy: CREATE_ON_UPDATE
+
+        # Number of backups. If 1 is set as the backup-count for example,
+        # then all entries of the map will be copied to another JVM for
+        # fail-safety. 0 means no backup.
+        backup-count: 1
+
+        # Number of async backups. 0 means no backup.
+        async-backup-count: 0
+
+        # Maximum number of seconds for each entry to stay in the map. Entries that are
+        # older than <time-to-live-seconds> and not updated for <time-to-live-seconds>
+        # will get automatically evicted from the map.
+        # Any integer between 0 and Integer.MAX_VALUE. 0 means infinite. Default is 0
+        time-to-live-seconds: 0
+
+        # Maximum number of seconds for each entry to stay idle in the map. Entries that are
+        # idle(not touched) for more than <max-idle-seconds> will get
+        # automatically evicted from the map. Entry is touched if get, put or containsKey is called.
+        # Any integer between 0 and Integer.MAX_VALUE. 0 means infinite. Default is 0.
+        max-idle-seconds: 0
+
+        eviction:
+          # Valid values are:
+          # NONE (no eviction),
+          # LRU (Least Recently Used),
+          # LFU (Least Frequently Used).
+          # NONE is the default.
+          eviction-policy: NONE
+          max-size-policy: PER_NODE
+          # Maximum size of the map. When max size is reached,
+          # map is evicted based on the policy defined.
+          # Any integer between 0 and Integer.MAX_VALUE. 0 means
+          # Integer.MAX_VALUE. Default is 0.
+          size: 0
+
+          # While recovering from split-brain (network partitioning),
+          # map entries in the small cluster will merge into the bigger cluster
+          # based on the policy set here. When an entry merge into the
+          # cluster, there might an existing entry with the same key already.
+          # Values of these entries might be different for that same key.
+          # Which value should be set for the key? Conflict is resolved by
+          # the policy set here. Default policy is PutIfAbsentMapMergePolicy
+          #
+          # There are built-in merge policies such as
+          # com.hazelcast.spi.merge.PassThroughMergePolicy; entry will be overwritten if merging entry exists for the key.
+          # com.hazelcast.spi.merge.PutIfAbsentMergePolicy ; entry will be added if the merging entry doesn't exist in the cluster.
+          # com.hazelcast.spi.merge.HigherHitsMergePolicy ; entry with the higher hits wins.
+          # com.hazelcast.spi.merge.LatestUpdateMergePolicy ; entry with the latest update wins.
+          merge-policy:
+            batch-size: 100
+            class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+
+          # Control caching of de-serialized values. Caching makes query evaluation faster, but it cost memory.
+          # Possible Values:
+          #              NEVER: Never cache deserialized object
+          #              INDEX-ONLY: Caches values only when they are inserted into an index.
+          #              ALWAYS: Always cache deserialized values.
+          cache-deserialized-values: INDEX-ONLY
+
+    multimap:
+      default:
+        backup-count: 1
+        value-collection-type: SET
+        merge-policy:
+          batch-size: 100
+          class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+
+    replicatedmap:
+      default:
+        in-memory-format: OBJECT
+        async-fillup: true
+        statistics-enabled: true
+        merge-policy:
+          batch-size: 100
+          class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+
+    list:
+      default:
+        backup-count: 1
+        merge-policy:
+          batch-size: 100
+          class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+
+    set:
+      default:
+        backup-count: 1
+        merge-policy:
+          batch-size: 100
+          class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+
+    reliable-topic:
+      default:
+        read-batch-size: 10
+        topic-overload-policy: BLOCK
+        statistics-enabled: true
+
+    ringbuffer:
+      default:
+        capacity: 10000
+        backup-count: 1
+        async-backup-count: 0
+        time-to-live-seconds: 0
+        in-memory-format: BINARY
+        merge-policy:
+          batch-size: 100
+          class-name: com.hazelcast.spi.merge.PutIfAbsentMergePolicy
+
+    flake-id-generator:
+      default:
+        prefetch-count: 100
+        prefetch-validity-millis: 600000
+        epoch-start: 1514764800000
+        node-id-offset: 0
+        bits-sequence: 6
+        bits-node-id: 16
+        allowed-future-millis: 15000
+        statistics-enabled: true
+
+    serialization:
+      portable-version: 0
+
+    cardinality-estimator:
+      default:
+        backup-count: 1
+        async-backup-count: 0
+        merge-policy:
+          batch-size: 100
+          class-name: HyperLogLogMergePolicy
+
+    crdt-replication:
+      replication-period-millis: 1000
+      max-concurrent-replication-targets: 1
+
+    pn-counter:
+      default:
+        replica-count: 2147483647
+        statistics-enabled: true
+
+    cp-subsystem:
+      cp-member-count: 0
+      group-size: 0
+      session-time-to-live-seconds: 300
+      session-heartbeat-interval-seconds: 5
+      missing-cp-member-auto-removal-seconds: 14400
+      fail-on-indeterminate-operation-state: false
+      raft-algorithm:
+        leader-election-timeout-in-millis: 2000
+        leader-heartbeat-period-in-millis: 5000
+        max-missed-leader-heartbeat-count: 5
+        append-request-max-entry-count: 100
+        commit-index-advance-count-to-snapshot: 10000
+        uncommitted-entry-count-to-reject-new-appends: 100
+        append-request-backoff-timeout-in-millis: 100
+    #    semaphores:
+    #      default:
+    #        jdk-compatible: false
+    #    locks:
+    #      default:
+    #        lock-acquire-limit: 0
+
+    metrics:
+      enabled: true
+      management-center:
+        enabled: true
+        retention-seconds: 5
+      jmx:
+        enabled: true
+      collection-frequency-seconds: 5
+
+    instance-tracking:
+      enabled: false
+
+    sql:
+      executor-pool-size: -1
+      operation-pool-size: -1
+      statement-timeout-millis: 0

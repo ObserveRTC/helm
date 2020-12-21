@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "webrtc-observer.fullname" . }}
+  labels:
+  {{- include "webrtc-observer.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "webrtc-observer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+    {{- include "webrtc-observer.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "webrtc-observer.fullname" . }}-config
+        {{- range .Values.observer.extraConfigMaps }}
+        - name: {{ .name }}
+          configMap: 
+            name:  {{ .configMapName }}
+        {{- end }}
+        {{- range .Values.observer.extraSecrets }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+        {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "webrtc-observer.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+            {{- range .Values.observer.extraConfigMaps }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+            {{- range .Values.observer.extraSecrets }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 7080
+              protocol: TCP
+          env:
+            - name: MICRONAUT_CONFIG_FILES
+              value: /etc/config/webrtc-observer.yaml
+            - name: HAZELCAST_CONFIG_FILE
+              value: /etc/config/hazelcast-config.yaml
+          readinessProbe:
+            exec:
+              command:
+                - touch
+                - /tmp/healthy
+          livenessProbe:
+            exec:
+              command:
+                - touch
+                - /tmp/healthy
+          resources:
+      {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}
