@@ -3,7 +3,23 @@ entries:
   webrtc-observer:
   - apiVersion: v2
     appVersion: 0.6-alpha
-    created: "2020-12-21T14:02:15.089273+02:00"
+    created: "2020-12-21T15:00:58.577216+02:00"
+    description: A microservice to observe Web Real Time Communications (WebRTC)
+    digest: be4d8f40423e3895f0520280856d861bd6e999181b9351f4bd1f8422171efd53
+    keywords:
+    - webrtc
+    - analyze
+    - monitor
+    - observer
+    - observertc
+    name: webrtc-observer
+    type: application
+    urls:
+    - https://observertc.github.io/helm/webrtc-observer-0.6.2.tgz
+    version: 0.6.2
+  - apiVersion: v2
+    appVersion: 0.6-alpha
+    created: "2020-12-21T15:00:58.575953+02:00"
     description: A microservice to observe Web Real Time Communications (WebRTC)
     digest: c75a5c96d7ebe9a5d02e0486bf524095065833a06c4ffebb5861deaec284d8ac
     keywords:
@@ -19,7 +35,7 @@ entries:
     version: 0.6.0
   - apiVersion: v2
     appVersion: 0.6-alpha
-    created: "2020-12-21T14:02:15.087896+02:00"
+    created: "2020-12-21T15:00:58.574718+02:00"
     description: A microservice to observe Web Real Time Communications (WebRTC)
     digest: 809092da358f0fd6868128e6fbdbbc01ba75e09e55c36bf18f278dcf6775c256
     keywords:
@@ -33,4 +49,4 @@ entries:
     urls:
     - https://observertc.github.io/helm/webrtc-observer-0.4.0.tgz
     version: 0.4.0
-generated: "2020-12-21T14:02:15.086141+02:00"
+generated: "2020-12-21T15:00:58.573233+02:00"
