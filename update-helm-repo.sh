@@ -13,6 +13,7 @@ set +x
 for dir in */ ; do
     helm package $dir
 done
+
 echo "Packages are made";
 git checkout gh-pages
 m=$(git ls-files --others --exclude-standard | grep '\.tgz$')
