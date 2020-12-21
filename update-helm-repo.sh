@@ -13,7 +13,7 @@ for dir in */ ; do
     helm package $dir
 done
 echo "Packages are made";
-
+git checkout gh-pages
 git ls-files --others --exclude-standard | grep '\.tgz$' | xargs git add $1
 helm repo index --url https://observertc.github.io/helm/ .
 message=$(git ls-files --others --exclude-standard | grep '\.tgz$')
