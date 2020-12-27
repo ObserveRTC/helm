@@ -27,16 +27,5 @@ version: 0.6.0
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: "0.6-alpha"
+appVersion: "0.6.0"
 
-#dependencies:
-#  # https://github.com/bitnami/charts/tree/master/bitnami/kafka
-#  - name: kafka
-#    version: 11.8.6
-#    repository: https://charts.bitnami.com/bitnami
-#    condition: kafka.enabled
-#  # https://github.com/bitnami/charts/tree/master/bitnami/mysql/
-#  - name: mysql
-#    version: 6.11.5
-#    repository: https://charts.bitnami.com/bitnami
-#    condition: mysql.enabled
