@@ -50,6 +50,7 @@ app.kubernetes.io/name: {{ include "webrtc-observer.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+
 {{/*
 Create the name of the service account to use
 */}}

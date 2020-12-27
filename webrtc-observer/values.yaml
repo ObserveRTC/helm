@@ -2,12 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: observertc/webrtc-observer
   pullPolicy: Always
-  tag: "0.6-alpha"
+  tag: "0.6.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -69,7 +69,7 @@ resources: {}
 
 autoscaling:
   enabled: false
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
@@ -92,13 +92,17 @@ observer:
   config:
     # Micronaut configs. You can change anything you wish in micronaut using this
     micronaut:
+      config-client:
+        enabled: false
       metrics:
         enabled: True
         export:
           prometheus:
             enabled: true
-            step: PT1M
             descriptions: true
+            step: PT1M
+      security:
+        enabled: false
       server:
         port: 7080
     endpoints:
@@ -110,22 +114,26 @@ observer:
       health:
         enabled: true
         sensitive: false
-
+        details-visible: ANONYMOUS
     kafka:
       bootstrap:
         servers: mykafka-cp-kafka-headless:9092
     observer:
+      # Configurations regarding to the evaluators of the observer
+      #
       # Static mapping between serviceUUID and serviceName for the reports.
       # the config key is the service name you want to see in the reports
       # and the uuid property points to the UUID, which is mapped to the name
-      #  serviceMapping:
-      #    desredServiceName:
-      #      uuid: "VALID UUID"
-
-      # Configurations regarding to the evaluators of the observer
-      #
+      # if a forwardTopic is not null for a serviceName, than
+      # all report belongs to that service will be forwarded to the corresponding topic
+#      serviceMappings:
+#        serviceName:
+#          forwardTopicName: "mytopic"
+#          uuids:
+#            - "e2bae5af-32c4-4784-b393-96143df80e2a"
+#            - "f672bf27-5de6-440a-a089-adb499633148"
+      # Configurations related to the evaluator evaluates the peer connections
       evaluators:
-        # Configurations related to the evaluator evaluates the peer connections
         pcObserver:
           # Defines the maximum time a peer connection can be idle,
           # If a peer connection does not send any update in this period
@@ -135,57 +143,14 @@ observer:
           # samples from peer connections.
           # Higher number decreases the load, but delays the updates
           mediaStreamUpdatesFlushInS: 15
-          # The number of parallel buffers the samples from
-          # peer connections are collected. This is
-          # slightly important for performance reason, as
-          # each buffer uses a mutex when it receives sample updates.
-          # if the value is 0, then the number of parallel buffers are equal
-          # to the number of available processors.
+          # Defines the number of parallel buffers to store peer connection update.
+          # The value 0 means it uses as many buffers as many processor the JVM can access to.
           mediaStreamsBufferNums: 0
-      # Configurations for kafka topics
-      # WARNING: If this is enabled, then the observer must have admin
-      # privilege to check and create topics
-      kafkaTopics:
-        runAdminClient: False
-        createIfNotExists: False
-        reports:
-          topicName: reports
-          onCreatePartitionNums: 30
-          onCreateReplicateFactor: 1
-          retentionTimeInMs: 86400000
-
-      # Configures the Reports forwarded to kafka.
-      # In default all reports are forwarded, and it is not recommended
-      # to turn this off, but if you know what you do and want to save some
-      # throughput, than go ahead
-#      outboundReports:
-#        reportOutboundRTPs: True
-#        reportInboundRTPs: True
-#        reportRemoteInboundRTPs: True
-#        reportTracks: True
-#        reportMediaSources: True
-#        reportCandidatePairs: True
-#        reportLocalCandidates: True
-#        reportRemoteCandidates: True
-#        reportUserMediaErrors: True
-
-      # By default we do not need a database at all, however
-      # for backup purposes or configuration fetches purposes
-      # it is remained here.
-#      database:
-#        enabled: False
-#        username: root
-#        password: password
-#        minIdleInMs: 100
-#        timeout: 1000
-#        jdbcURL: jdbc:mysql://localhost:3306/WebRTCObserver?serverTimezone=EET&useLegacyDatetimeCode=false
-#        jdbcDriver: "com.mysql.cj.jdbc.Driver"
-#        maxPoolSize: 100
-#        poolname: webrtc_observer
-#        dialect: MySQL
-
 
 hazelcastConfig:
+  # Observer uses hazelcast underneath.
+  # You need at least two instance to share data, and
+  # you need to configure below the connection for the hazelcast.
   hazelcast:
     cluster-name: dev
     network:
@@ -454,7 +419,7 @@ hazelcastConfig:
         statistics-enabled: true
 
     cp-subsystem:
-      cp-member-count: 0
+      cp-member-count: 2
       group-size: 0
       session-time-to-live-seconds: 300
       session-heartbeat-interval-seconds: 5
