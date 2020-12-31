@@ -15,13 +15,7 @@ for dir in */ ; do
 done
 
 echo "Packages are made";
-<<<<<<< Updated upstream
-git stash
-=======
-
->>>>>>> Stashed changes
 git checkout gh-pages
-git stash pop
 m=$(git ls-files --others --exclude-standard | grep '\.tgz$')
 message="Added: $m"
 git ls-files --others --exclude-standard | grep '\.tgz$' | xargs git add $1
