@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "webrtc-observer.fullname" . }}
+  name: {{ include "report-connector.fullname" . }}
   labels:
-    {{- include "webrtc-observer.labels" . | nindent 4 }}
+    {{- include "report-connector.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "webrtc-observer.fullname" . }}
+    name: {{ include "report-connector.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

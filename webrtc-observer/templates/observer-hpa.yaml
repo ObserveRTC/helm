@@ -1,0 +1,28 @@
+{{- if .Values.observer.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "webrtc-observer.fullname" . }}
+  labels:
+    {{- include "webrtc-observer.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "webrtc-observer.fullname" . }}
+  minReplicas: {{ .Values.observer.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.observer.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.observer.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.observer.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.observer.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.observer.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}

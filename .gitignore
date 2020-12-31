@@ -1,1 +1,3 @@
 *.iml
+debug.yaml
+gradlew*

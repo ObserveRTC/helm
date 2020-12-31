@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "hzelman.fullname" . }}
+  labels:
+  {{- include "hzelman.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "hzelman.fullname" . }}
+  replicas: {{ .Values.hzelman.replicaCount }}
+  selector:
+    matchLabels:
+  {{- include "hzelman.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.hzelman.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+    {{- include "hzelman.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 90
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "hzelman.fullname" . }}-config
+        {{- range .Values.observer.extraConfigMaps }}
+        - name: {{ .name }}
+          configMap:
+            name:  {{ .configMapName }}
+        {{- end }}
+        {{- range .Values.observer.extraSecrets }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+      {{- end }}
+      {{- with .Values.hzelman.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+      {{- toYaml .Values.hzelman.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+            {{- range .Values.observer.extraConfigMaps }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+            {{- range .Values.observer.extraSecrets }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+          securityContext:
+          {{- toYaml .Values.hzelman.securityContext | nindent 12 }}
+          image: "{{ .Values.hzelman.image.repository }}:{{ .Values.hzelman.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.hzelman.image.pullPolicy }}
+          ports:
+            - name: hazelcast
+              containerPort: 5701
+            - name: http
+              containerPort: 7080
+              protocol: TCP
+          env:
+            - name: MICRONAUT_CONFIG_FILES
+              value: /etc/config/webrtc-observer.yaml
+            - name: HAZELCAST_CONFIG_FILE
+              value: /etc/config/hazelcast-config.yaml
+            - name: JAVA_OPTS
+              value: "-Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.cluster.version.auto.upgrade.enabled=true"
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 7081
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 7081
+            initialDelaySeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 10
+          resources:
+      {{- toYaml .Values.hzelman.resources | nindent 12 }}
+      {{- with .Values.hzelman.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hzelman.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.hzelman.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}

@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "report-connector.fullname" . }}
+  labels:
+  {{- include "report-connector.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "report-connector.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+    {{- include "report-connector.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "report-connector.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "report-connector.fullname" . }}-config
+        {{- range .Values.extraConfigMaps }}
+        - name: {{ .name }}
+          configMap:
+            name:  {{ .configMapName }}
+        {{- end }}
+        {{- range .Values.extraSecrets }}
+        - name: {{ .name }}
+          secret:
+            secretName:  {{ .secretName }}
+      {{- end }}
+      {{/*        {{- range .Values.pipelines }}*/}}
+      {{/*        - name: {{ .name }}*/}}
+      {{/*          configMap:*/}}
+      {{/*            name:  {{ .configMapName }}*/}}
+      {{/*        {{- end }}*/}}
+      containers:
+        - name: {{ .Chart.Name }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ .Values.micronaut.mountPath }}
+            {{- range .Values.extraConfigMaps }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+            {{- range .Values.extraSecrets }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{- end }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: MICRONAUT_CONFIG_FILES
+              value: {{ printf "%s/micronaut-config.yaml" .Values.micronaut.mountPath }}
+          ports:
+            - name: http
+              containerPort: 7788
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+      {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}

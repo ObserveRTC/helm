@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hzelman.fullname" . }}
+  labels:
+  {{- include "hzelman.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.hzelman.service.type }}
+  ports:
+    - port: {{ .Values.hzelman.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+  {{- include "hzelman.selectorLabels" . | nindent 4 }}

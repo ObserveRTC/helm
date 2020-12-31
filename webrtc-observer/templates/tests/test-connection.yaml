@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "webrtc-observer.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "webrtc-observer.fullname" . }}:{{ .Values.observer.service.port }}']
   restartPolicy: Never
