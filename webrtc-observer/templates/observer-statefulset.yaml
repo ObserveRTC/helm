@@ -1,31 +1,35 @@
+{{- if .Values.observer.enabled -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "webrtc-observer.fullname" . }}
+  name: {{ include "observer.fullname" . }}
   labels:
-  {{- include "webrtc-observer.labels" . | nindent 4 }}
+  {{- include "observer.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "webrtc-observer.fullname" . }}
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "observer.fullname" . }}
+  {{- if not .Values.observer.autoscaling.enabled }}
+  replicas: {{ .Values.observer.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-  {{- include "webrtc-observer.selectorLabels" . | nindent 6 }}
+  {{- include "observer.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- with .Values.observer.podAnnotations }}
       annotations:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-    {{- include "webrtc-observer.selectorLabels" . | nindent 8 }}
+    {{- include "observer.selectorLabels" . | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: 90
       volumes:
-        - name: config-volume
+        - name: observer-config-volume
           configMap:
-            name: {{ include "webrtc-observer.fullname" . }}-config
+            name: {{ include "observer.fullname" . }}-config
+        - name: hazelcast-config-volume
+          configMap:
+            name:  {{ .Release.Name }}-hazelcast-config
         {{- range .Values.observer.extraConfigMaps }}
         - name: {{ .name }}
           configMap: 
@@ -36,18 +40,20 @@ spec:
           secret:
             secretName: {{ .secretName }}
         {{- end }}
-      {{- with .Values.imagePullSecrets }}
+      {{- with .Values.observer.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "webrtc-observer.serviceAccountName" . }}
       securityContext:
-      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- toYaml .Values.observer.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Values.observer.containerName }}
           volumeMounts:
-            - name: config-volume
-              mountPath: /etc/config
+            - name: observer-config-volume
+              mountPath: /etc/observer-config
+            - name: hazelcast-config-volume
+              mountPath: /etc/hazelcast-config
             {{- range .Values.observer.extraConfigMaps }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
@@ -57,9 +63,9 @@ spec:
               mountPath: {{ .mountPath }}
             {{- end }}
           securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- toYaml .Values.observer.securityContext | nindent 12 }}
+          image: "{{ .Values.observer.image.repository }}:{{ .Values.observer.image.tag }}"
+          imagePullPolicy: {{ .Values.observer.image.pullPolicy }}
           ports:
             - name: hazelcast
               containerPort: 5701
@@ -68,9 +74,9 @@ spec:
               protocol: TCP
           env:
             - name: MICRONAUT_CONFIG_FILES
-              value: /etc/config/webrtc-observer.yaml
+              value: /etc/observer-config/observer.yaml
             - name: HAZELCAST_CONFIG_FILE
-              value: /etc/config/hazelcast-config.yaml
+              value: /etc/hazelcast-config/hazelcast-config.yaml
             - name: JAVA_OPTS
               value: "-Dhazelcast.shutdownhook.policy=GRACEFUL -Dhazelcast.cluster.version.auto.upgrade.enabled=true"
           readinessProbe:
@@ -86,27 +92,18 @@ spec:
             initialDelaySeconds: 5
             timeoutSeconds: 3
             failureThreshold: 10
-{{/*          readinessProbe:*/}}
-{{/*            exec:*/}}
-{{/*              command:*/}}
-{{/*                - touch*/}}
-{{/*                - /tmp/healthy*/}}
-{{/*          livenessProbe:*/}}
-{{/*            exec:*/}}
-{{/*              command:*/}}
-{{/*                - touch*/}}
-{{/*                - /tmp/healthy*/}}
           resources:
-      {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
+      {{- toYaml .Values.observer.resources | nindent 12 }}
+      {{- with .Values.observer.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- with .Values.observer.affinity }}
       affinity:
       {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.observer.tolerations }}
       tolerations:
   {{- toYaml . | nindent 8 }}
   {{- end }}
+{{- end }}
