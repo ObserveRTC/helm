@@ -1,12 +1,13 @@
 apiVersion: v2
 name: webrtc-observer
-description: A microservice to observe Web Real Time Communications (WebRTC)
+description: Helm package to deploy solutions for a WebRTC-Observer project from ObserveRTC
 
 keywords:
   - webrtc
   - analyze
   - monitor
-  - observer
+  - observe
+  - evaluate
   - observertc
 
 # A chart can be either an 'application' or a 'library' chart.
