@@ -1,22 +1,11 @@
 apiVersion: v1
 entries:
-  report-connector:
-  - apiVersion: v2
-    appVersion: 1.16.0
-    created: "2020-12-31T13:50:59.478978+02:00"
-    description: A Helm chart for Report-Connector
-    digest: 36eefce1b5737ad2d664f7bd31dd3b67bfcc237c24fd50fa7fbff4e6a78730cd
-    name: report-connector
-    type: application
-    urls:
-    - https://observertc.github.io/helm/report-connector-0.1.0.tgz
-    version: 0.1.0
   webrtc-observer:
   - apiVersion: v2
-    appVersion: 0.6.0
-    created: "2020-12-31T13:50:59.480646+02:00"
+    appVersion: 1.0.0
+    created: "2021-01-03T21:36:57.61221+02:00"
     description: A microservice to observe Web Real Time Communications (WebRTC)
-    digest: ad3cd24dd8c5db33b7e435d2ca742ed0ed1b0bda504ace5849e0ac5af689ddb8
+    digest: 994e0780b1b67b26a9fe89c8cc09699de40f0b00f12f116c7441b7804b9b5be0
     keywords:
     - webrtc
     - analyze
@@ -26,6 +15,6 @@ entries:
     name: webrtc-observer
     type: application
     urls:
-    - https://observertc.github.io/helm/webrtc-observer-0.6.0.tgz
-    version: 0.6.0
-generated: "2020-12-31T13:50:59.478358+02:00"
+    - https://observertc.github.io/helm/webrtc-observer-1.0.0.tgz
+    version: 1.0.0
+generated: "2021-01-03T21:36:57.608216+02:00"
