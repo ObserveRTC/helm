@@ -17,7 +17,7 @@ observer:
 
   containerName: "observer"
   image:
-    repository: observertc/webrtc-observer
+    repository: observertc/observer
     pullPolicy: Always
     tag: "0.6.0"
 
@@ -157,9 +157,9 @@ connector:
 
   containerName: "connector"
   image:
-    repository: observertc/report-connector
+    repository: observertc/connector
     pullPolicy: Always
-    tag: "0.1"
+    tag: "0.1.0"
 
   imagePullSecrets: [ ]
   nameOverride: ""
