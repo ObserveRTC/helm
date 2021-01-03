@@ -3,18 +3,20 @@ entries:
   webrtc-observer:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2021-01-03T21:36:57.61221+02:00"
-    description: A microservice to observe Web Real Time Communications (WebRTC)
-    digest: 994e0780b1b67b26a9fe89c8cc09699de40f0b00f12f116c7441b7804b9b5be0
+    created: "2021-01-03T21:42:01.535578+02:00"
+    description: Helm package to deploy solutions for a WebRTC-Observer project from
+      ObserveRTC
+    digest: fb75b3b5a7fef735a63420ac851b9d8d3d1cf77d6ca8459bd71f1e52005434d2
     keywords:
     - webrtc
     - analyze
     - monitor
-    - observer
+    - observe
+    - evaluate
     - observertc
     name: webrtc-observer
     type: application
     urls:
     - https://observertc.github.io/helm/webrtc-observer-1.0.0.tgz
     version: 1.0.0
-generated: "2021-01-03T21:36:57.608216+02:00"
+generated: "2021-01-03T21:42:01.533922+02:00"
