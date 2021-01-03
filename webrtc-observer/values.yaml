@@ -2,85 +2,87 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 2
-
-image:
-  repository: observertc/webrtc-observer
-  pullPolicy: Always
-  tag: "0.6.0"
-
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: false
   # Annotations to add to the service account
-  annotations: {}
+  annotations: { }
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations:
-  prometheus.io/scrape: 'true'
-  prometheus.io/path: '/prometheus'
-  prometheus.io/port: "7081"
-
-podSecurityContext: {}
-# fsGroup: 2000
-
-securityContext: {}
-# capabilities:
-#   drop:
-#   - ALL
-# readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
-
-service:
-  type: NodePort
-  port: 27080
-
-ingress:
-  enabled: false
-  annotations: {}
-  # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: chart-example.local
-      paths: []
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
-
-resources: {}
-# We usually recommend not to specify default resources and to leave this as a conscious
-# choice for the user. This also increases chances charts run on environments with little
-# resources, such as Minikube. If you do want to specify resources, uncomment the following
-# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-# limits:
-#   cpu: 100m
-#   memory: 128Mi
-# requests:
-#   cpu: 100m
-#   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
 observer:
+  enabled: true
+  replicaCount: 3
+
+  containerName: "observer"
+  image:
+    repository: observertc/observer
+    pullPolicy: Always
+    tag: "0.6.0"
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/prometheus'
+    prometheus.io/port: "7081"
+
+  podSecurityContext: { }
+  # fsGroup: 2000
+
+  securityContext: { }
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    type: NodePort
+    port: 27080
+
+  ingress:
+    enabled: false
+    annotations: { }
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths: [ ]
+    tls: [ ]
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: { }
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: { }
+
+  tolerations: [ ]
+
+  affinity: { }
+
   extraConfigMaps: []
   # - name: name-inside-deployment
   #   configMapName: configMapName 
@@ -89,6 +91,7 @@ observer:
   # - name: name-inside-deployment
   #   secretName: secretName
   #   mountPath: /etc/secrets
+
   config:
     # Micronaut configs. You can change anything you wish in micronaut using this
     micronaut:
@@ -146,6 +149,103 @@ observer:
           # Defines the number of parallel buffers to store peer connection update.
           # The value 0 means it uses as many buffers as many processor the JVM can access to.
           mediaStreamsBufferNums: 0
+
+
+connector:
+  enabled: true
+  replicaCount: 1
+
+  containerName: "connector"
+  image:
+    repository: observertc/connector
+    pullPolicy: Always
+    tag: "0.1.0"
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations: { }
+
+  podSecurityContext: { }
+  # fsGroup: 2000
+
+  securityContext: { }
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  service:
+    type: ClusterIP
+    port: 27788
+
+  resources: { }
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: { }
+
+  tolerations: [ ]
+
+  affinity: { }
+
+  extraConfigMaps: [ ]
+  # - name: name-inside-deployment
+  #   configMapName: configMapName
+  #   mountPath: /etc/config2
+
+  extraSecrets: [ ]
+  #  - name: my-credentials
+  #    secretName: secret-credential-name
+  #    mountPath: /etc/credentials
+
+  # Additional configurations for micronaut
+  # remove the {} when you add a configuration. Example configuration below
+  micronaut:
+    mountPath: "/etc/config"
+    config: {}
+#    pipelines:
+#     corePoolSize: 10
+#     maxParallel: 50
+
+  # pipelines to be loaded
+  # remove the {} when you add a configuration, example configuration below
+
+  pipelines: { }
+  #  generalPipeline.yaml:
+  #    name: "General pipeline to dump reports from webrtc-observer"
+  #    source:
+  #      type: KafkaSource
+  #      config:
+  #        topic: "reports"
+  #        properties:
+  #          bootstrap.servers: my-kafka-address:9092
+  #          group.id: "my-general-consumer-group"
+  #    evaluator:
+  #      bufferThresholdNum: 10000
+  #      bufferThresholdInS: 30
+  #    sink:
+  #      type: BigQuerySink
+  #      config:
+  #        credentialFile: "/etc/credentials/credential.json"
+  #        projectId: "myProject"
+  #        datasetId: "myDataset"
+  #        schemaCheck:
+  #          enabled: True
+  #          createTableIfNotExists: True
+  #          createDatasetIfNotExists: True
+
+
+
+
 
 hazelcastConfig:
   # Observer uses hazelcast underneath.
@@ -419,8 +519,8 @@ hazelcastConfig:
         statistics-enabled: true
 
     cp-subsystem:
-      cp-member-count: 2
-      group-size: 0
+      cp-member-count: 3
+      group-size: 3
       session-time-to-live-seconds: 300
       session-heartbeat-interval-seconds: 5
       missing-cp-member-auto-removal-seconds: 14400

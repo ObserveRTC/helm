@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-hazelcast-config
+data:
+{{- with .Values.hazelcastConfig }}
+  hazelcast-config.yaml: |
+{{- toYaml . | nindent 4 }}
+{{- end }}

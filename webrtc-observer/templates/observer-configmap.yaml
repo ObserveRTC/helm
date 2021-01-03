@@ -1,0 +1,11 @@
+{{- if .Values.observer.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "observer.fullname" . }}-config
+data:
+{{- with .Values.observer.config }}
+  observer.yaml: |
+{{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
