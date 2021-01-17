@@ -13,13 +13,13 @@ serviceAccount:
 
 observer:
   enabled: true
-  replicaCount: 3
+  replicaCount: 1
 
   containerName: "observer"
   image:
     repository: observertc/observer
     pullPolicy: Always
-    tag: "0.6.0"
+    tag: "0.6.1"
 
   imagePullSecrets: [ ]
   nameOverride: ""
@@ -118,37 +118,35 @@ observer:
         enabled: true
         sensitive: false
         details-visible: ANONYMOUS
-    kafka:
-      bootstrap:
-        servers: mykafka-cp-kafka-headless:9092
+
     observer:
-      # Configurations regarding to the evaluators of the observer
-      #
-      # Static mapping between serviceUUID and serviceName for the reports.
-      # the config key is the service name you want to see in the reports
-      # and the uuid property points to the UUID, which is mapped to the name
-      # if a forwardTopic is not null for a serviceName, than
-      # all report belongs to that service will be forwarded to the corresponding topic
-#      serviceMappings:
-#        serviceName:
-#          forwardTopicName: "mytopic"
-#          uuids:
-#            - "e2bae5af-32c4-4784-b393-96143df80e2a"
-#            - "f672bf27-5de6-440a-a089-adb499633148"
-      # Configurations related to the evaluator evaluates the peer connections
-      evaluators:
-        pcObserver:
-          # Defines the maximum time a peer connection can be idle,
-          # If a peer connection does not send any update in this period
-          # then it is considered to be expired.
-          peerConnectionMaxIdleTimeInS: 300
-          # Defines the flush period in seconds for the buffer collecting
-          # samples from peer connections.
-          # Higher number decreases the load, but delays the updates
-          mediaStreamUpdatesFlushInS: 15
-          # Defines the number of parallel buffers to store peer connection update.
-          # The value 0 means it uses as many buffers as many processor the JVM can access to.
-          mediaStreamsBufferNums: 0
+      connectors:
+      - name: "LoggerSink"
+        buffer:
+          maxItems: 100
+          maxWaitingTimeInS: 10
+        sink:
+          type: LoggerSink
+          config:
+            printReports: False
+        evaluators:
+          pcObserver:
+            peerConnectionMaxIdleTimeInS: 300
+            mediaStreamUpdatesFlushInS: 15
+            mediaStreamsBufferNums: 0
+          conurrentStreams:
+            enabled: true
+            threshold: 100
+        outboundReports:
+          reportOutboundRTPs: True
+          reportInboundRTPs: True
+          reportRemoteInboundRTPs: True
+          reportTracks: True
+          reportMediaSources: True
+          reportCandidatePairs: True
+          reportLocalCandidates: True
+          reportRemoteCandidates: True
+          reportUserMediaErrors: True
 
 
 connector:
@@ -159,7 +157,7 @@ connector:
   image:
     repository: observertc/connector
     pullPolicy: Always
-    tag: "0.1.0"
+    tag: "0.1.2"
 
   imagePullSecrets: [ ]
   nameOverride: ""
@@ -242,8 +240,6 @@ connector:
   #          enabled: True
   #          createTableIfNotExists: True
   #          createDatasetIfNotExists: True
-
-
 
 
 
@@ -519,8 +515,8 @@ hazelcastConfig:
         statistics-enabled: true
 
     cp-subsystem:
-      cp-member-count: 3
-      group-size: 3
+      cp-member-count: 0
+      group-size: 0
       session-time-to-live-seconds: 300
       session-heartbeat-interval-seconds: 5
       missing-cp-member-auto-removal-seconds: 14400
