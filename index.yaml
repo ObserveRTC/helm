@@ -3,7 +3,25 @@ entries:
   webrtc-observer:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2021-01-17T11:49:48.558189+02:00"
+    created: "2021-02-24T03:53:40.774218+02:00"
+    description: Helm package to deploy solutions for a WebRTC-Observer project from
+      ObserveRTC
+    digest: f9f0bb8c1f197197c184e460ebb92e6676564df2e47bd083be732d2d043c2588
+    keywords:
+    - webrtc
+    - analyze
+    - monitor
+    - observe
+    - evaluate
+    - observertc
+    name: webrtc-observer
+    type: application
+    urls:
+    - https://observertc.github.io/helm/webrtc-observer-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2021-02-24T03:53:40.77215+02:00"
     description: Helm package to deploy solutions for a WebRTC-Observer project from
       ObserveRTC
     digest: 362dc44246b447018f56297c31b9a38b4953ed525b64bb51dd9da59b2ad765f9
@@ -19,4 +37,4 @@ entries:
     urls:
     - https://observertc.github.io/helm/webrtc-observer-1.0.0.tgz
     version: 1.0.0
-generated: "2021-01-17T11:49:48.554791+02:00"
+generated: "2021-02-24T03:53:40.769284+02:00"
