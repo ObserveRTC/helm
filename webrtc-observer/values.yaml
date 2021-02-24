@@ -209,10 +209,10 @@ connector:
   # remove the {} when you add a configuration. Example configuration below
   micronaut:
     mountPath: "/etc/config"
-    config: {}
-#    pipelines:
-#     corePoolSize: 10
-#     maxParallel: 50
+    config:
+      pipelines:
+        corePoolSize: 10
+        maxParallel: 50
 
   # pipelines to be loaded
   # remove the {} when you add a configuration, example configuration below
