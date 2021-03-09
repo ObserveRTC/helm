@@ -20,13 +20,13 @@ keywords:
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.1
+# The app version here indicate a set of applications released at a specific time.
+#
+# Major version number indicates the set of services and templates belongs to the chart
+# Minor version number indicates structural changes of a service configuration
+# patch version indicate bugfixes, or default configuration changes
+version: 2.0.0
 
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: "1.0.0"
+# The app version here indicates the observer version
+appVersion: "0.7.0"
 

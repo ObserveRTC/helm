@@ -19,7 +19,7 @@ observer:
   image:
     repository: observertc/observer
     pullPolicy: Always
-    tag: "0.6.1"
+    tag: "0.7.0"
 
   imagePullSecrets: [ ]
   nameOverride: ""
@@ -94,60 +94,8 @@ observer:
 
   config:
     # Micronaut configs. You can change anything you wish in micronaut using this
-    micronaut:
-      config-client:
-        enabled: false
-      metrics:
-        enabled: True
-        export:
-          prometheus:
-            enabled: true
-            descriptions: true
-            step: PT1M
-      security:
-        enabled: false
-      server:
-        port: 7080
-    endpoints:
-      all:
-        port: 7081
-      prometheus:
-        enabled: true
-        sensitive: false
-      health:
-        enabled: true
-        sensitive: false
-        details-visible: ANONYMOUS
-
-    observer:
-      connectors:
-      - name: "LoggerSink"
-        buffer:
-          maxItems: 100
-          maxWaitingTimeInS: 10
-        sink:
-          type: LoggerSink
-          config:
-            printReports: False
-        evaluators:
-          pcObserver:
-            peerConnectionMaxIdleTimeInS: 300
-            mediaStreamUpdatesFlushInS: 15
-            mediaStreamsBufferNums: 0
-          conurrentStreams:
-            enabled: true
-            threshold: 100
-        outboundReports:
-          reportOutboundRTPs: True
-          reportInboundRTPs: True
-          reportRemoteInboundRTPs: True
-          reportTracks: True
-          reportMediaSources: True
-          reportCandidatePairs: True
-          reportLocalCandidates: True
-          reportRemoteCandidates: True
-          reportUserMediaErrors: True
-
+    micronaut: {}
+    observer: {}
 
 connector:
   enabled: true
@@ -157,7 +105,7 @@ connector:
   image:
     repository: observertc/connector
     pullPolicy: Always
-    tag: "0.1.2"
+    tag: "0.1.6"
 
   imagePullSecrets: [ ]
   nameOverride: ""
@@ -205,43 +153,104 @@ connector:
   #    secretName: secret-credential-name
   #    mountPath: /etc/credentials
 
-  # Additional configurations for micronaut
   # remove the {} when you add a configuration. Example configuration below
-  micronaut:
-    mountPath: "/etc/config"
-    config:
-      pipelines:
-        corePoolSize: 10
-        maxParallel: 50
+  config:
+    # Micronaut specific configurations
+    micronaut: {}
 
-  # pipelines to be loaded
-  # remove the {} when you add a configuration, example configuration below
+    # Connector specific configurations
+    connector:
+      # Here you define your pipeline
+      pipelines: []
 
-  pipelines: { }
-  #  generalPipeline.yaml:
-  #    name: "General pipeline to dump reports from webrtc-observer"
-  #    source:
-  #      type: KafkaSource
-  #      config:
-  #        topic: "reports"
-  #        properties:
-  #          bootstrap.servers: my-kafka-address:9092
-  #          group.id: "my-general-consumer-group"
-  #    evaluator:
-  #      bufferThresholdNum: 10000
-  #      bufferThresholdInS: 30
-  #    sink:
-  #      type: BigQuerySink
-  #      config:
-  #        credentialFile: "/etc/credentials/credential.json"
-  #        projectId: "myProject"
-  #        datasetId: "myDataset"
-  #        schemaCheck:
-  #          enabled: True
-  #          createTableIfNotExists: True
-  #          createDatasetIfNotExists: True
+kafka:
+  enabled: true
+  replicaCount: 1
+  containerName: "kafka"
+  pvc:
+    enabled: true
+    size: "10Gi"
+    accessMode: "ReadWriteOnce"
+    annotations: {}
+      #
+      # If you want to keep the logs after the chart has been uninstalled, then you can uncomment the keep policy
+      # WARNING! If you uncomment this keep policy, then you need to
+      # ensure the zookeeper cluster id consistency manually.
+      #
+      #
+      # helm.sh/resource-policy: "keep"
+
+  envs:
+    advertisedPort: "9092"
+    advertisedHost: "pre-kafka"
+    brokerId: "0"
+    createTopics: reports:12:1,mytopic:12:1
+  image:
+    repository: wurstmeister/kafka
+    pullPolicy: Always
+    tag: "latest"
 
 
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations: { }
+  podSecurityContext: { }
+  securityContext: { }
+  resources: { }
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+
+  service:
+    type: ClusterIP
+    port: 9092
+
+zookeeper:
+  enabled: true
+  replicaCount: 1
+  containerName: "zookeeper"
+  image:
+    repository: digitalwonderland/zookeeper
+    pullPolicy: Always
+    tag: "latest"
+
+  envs:
+    zookeeperId: "1"
+    zookeeperServer: "observertc-zookeeper"
+
+  imagePullSecrets: [ ]
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations: { }
+  podSecurityContext: { }
+  securityContext: { }
+  resources: { }
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
+
+  service:
+    type: ClusterIP
+    port: 2181
 
 hazelcastConfig:
   # Observer uses hazelcast underneath.

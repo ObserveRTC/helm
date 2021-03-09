@@ -4,12 +4,8 @@ kind: ConfigMap
 metadata:
   name: {{ include "connector.fullname" . }}-config
 data:
-{{- with .Values.connector.micronaut.config }}
-  micronaut-config.yaml: |
+{{- with .Values.connector.config }}
+  connector.yaml: |
 {{- toYaml . | nindent 4 }}
 {{- end }}
-{{ range $key, $value := .Values.connector.pipelines }}
-  {{ $key }}: |
-  {{- toYaml $value | nindent 4 }}
-{{ end }}
 {{- end }}
