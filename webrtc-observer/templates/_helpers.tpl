@@ -14,7 +14,7 @@ Create the name of the service account to use
 Expand the name of the chart.
 */}}
 {{- define "observer.name" -}}
-{{- $name := printf "%s-observertc-observer" .Release.Name }}
+{{- $name := printf "%s-observer" .Release.Name }}
 {{- default $name .Values.observer.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -27,7 +27,7 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.observer.fullnameOverride }}
 {{- .Values.observer.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default "observertc-observer" .Values.observer.nameOverride }}
+{{- $name := default "observer" .Values.observer.nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -65,7 +65,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 
 {{- define "connector.name" -}}
-{{- $name := printf "%s-observertc-connector" .Release.Name }}
+{{- $name := printf "%s-connector" .Release.Name }}
 {{- default $name .Values.connector.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -79,7 +79,7 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.connector.fullnameOverride }}
 {{- .Values.connector.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default "observertc-connector" .Values.connector.nameOverride }}
+{{- $name := default "connector" .Values.connector.nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}

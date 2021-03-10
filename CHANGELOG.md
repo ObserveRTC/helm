@@ -10,7 +10,8 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
  * Separated pipelines configuration for the connector in separated files
-  
+ * prefix `observertc` for observer, and connector in the deployment
+ * Unnecessary nodes
 ## Chart Version: 1.0.1 
 
 ### Fixed
