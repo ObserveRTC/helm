@@ -1,9 +1,4 @@
-
-ObserveRTC Helm charts
-==
-
-This repository contains helm chart to provide scripts to deploy a WebRTC Monitoring solutions to [Kubernetes](http://kubernetes.io).
-
+## Introduction
 
 
 ## Prerequisites
