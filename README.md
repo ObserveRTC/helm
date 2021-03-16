@@ -1,8 +1,3 @@
-# ObserveRTC
-
-ObserveRTC is an open source initiative aimed to provide tools to monitor and analyze applications for real-time communication. is an open source initiative aimed to 
-provide tools to monitor and analyze applications for real-time communication.
-
 ## Introduction
 
 This chart bootstraps the [Kubernetes](http://kubernetes.io) deployment of the applications 
