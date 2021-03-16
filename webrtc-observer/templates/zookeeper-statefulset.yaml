@@ -1,0 +1,61 @@
+{{- if .Values.zookeeper.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "zookeeper.fullname" . }}
+  labels:
+  {{- include "zookeeper.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "zookeeper.fullname" . }}
+  {{- if not .Values.zookeeper.autoscaling.enabled }}
+  replicas: {{ .Values.zookeeper.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+  {{- include "zookeeper.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.zookeeper.podAnnotations }}
+      annotations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+    {{- include "zookeeper.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 15
+      serviceAccountName: {{ include "webrtc-observer.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.zookeeper.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.zookeeper.containerName }}
+          securityContext:
+          {{- toYaml .Values.zookeeper.securityContext | nindent 12 }}
+          image: "{{ .Values.zookeeper.image.repository }}:{{ .Values.zookeeper.image.tag }}"
+          imagePullPolicy: {{ .Values.zookeeper.image.pullPolicy }}
+          ports:
+            - containerPort: 2181
+              protocol: TCP
+            - containerPort: 2888
+              name: server
+            - containerPort: 3888
+              name: leader-election
+          env:
+            - name: ZOOKEEPER_ID
+              value: {{ .Values.zookeeper.envs.zookeeperId | quote }}
+            - name: ZOOKEEPER_SERVER_1
+              value: {{ .Values.zookeeper.envs.zookeeperServer | quote }}
+          resources:
+      {{- toYaml .Values.zookeeper.resources | nindent 12 }}
+      {{- with .Values.zookeeper.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zookeeper.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zookeeper.tolerations }}
+      tolerations:
+  {{- toYaml . | nindent 8 }}
+  {{- end }}
+{{- end }}

@@ -14,6 +14,7 @@ for dir in */ ; do
     helm package $dir
 done
 
+branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
 echo "Packages are made";
 m=$(git ls-files --others --exclude-standard | grep '\.tgz$')
 mkdir generated_packages
@@ -26,5 +27,5 @@ git ls-files --others --exclude-standard | grep '\.tgz$' | xargs git add $1
 helm repo index --url https://observertc.github.io/helm/ .
 git commit -a -m"$message"
 git push
-git checkout main
+git checkout $branch
 rm index.yaml

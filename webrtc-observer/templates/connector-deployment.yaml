@@ -46,7 +46,7 @@ spec:
         - name: {{ .Values.connector.containerName }}
           volumeMounts:
             - name: config-volume
-              mountPath: {{ .Values.connector.micronaut.mountPath }}
+              mountPath: /etc/connector-config
             {{- range .Values.connector.extraConfigMaps }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
@@ -61,16 +61,7 @@ spec:
           imagePullPolicy: {{ .Values.connector.image.pullPolicy }}
           env:
             - name: MICRONAUT_CONFIG_FILES
-              value: {{ printf "%s/micronaut-config.yaml" .Values.connector.micronaut.mountPath }}
-              {{- if .Values.connector.pipelines }}
-            - name: PIPELINE_CONFIG_FILES
-                {{- $path := .Values.connector.micronaut.mountPath }}
-                {{- $files := "" }}
-                {{- range $key, $value := .Values.connector.pipelines }}
-                  {{- $files = printf "%s/%s,%s" $path $key $files }}
-                {{- end }}
-              value: {{ printf $files }}
-              {{- end }}
+              value: /etc/connector-config/connector.yaml
           ports:
             - name: http
               containerPort: 7788
